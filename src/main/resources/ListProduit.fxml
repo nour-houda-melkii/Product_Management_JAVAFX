@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ListeProduitController">
+    <children>
+        <VBox layoutX="20" layoutY="20" spacing="10">
+            <children>
+                <HBox spacing="10">
+                    <children>
+                        <Label text="Name:"/>
+                        <TextField fx:id="nameField" prefWidth="200"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10">
+                    <children>
+                        <Label text="Description:"/>
+                        <TextField fx:id="descriptionField" prefWidth="200"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10">
+                    <children>
+                        <Label text="Price:"/>
+                        <TextField fx:id="priceField" prefWidth="200"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10">
+                    <children>
+                        <Label text="Quantity:"/>
+                        <TextField fx:id="quantityField" prefWidth="200"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10">
+                    <children>
+                        <Label text="Image:"/>
+                        <TextField fx:id="imageField" prefWidth="150" editable="false"/>
+                        <Button text="Choose Image" onAction="#choisirImage"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10">
+                    <children>
+                        <Label text="Category ID:"/>
+                        <TextField fx:id="categoryField" prefWidth="200"/>
+                    </children>
+                </HBox>
+                <HBox spacing="10">
+                    <children>
+                        <Button text="Add" onAction="#ajouterProduit"/>
+                        <Button text="Update" onAction="#modifierProduit"/>
+                        <Button text="Delete" onAction="#supprimerProduit"/>
+                        <Button text="Clear" onAction="#clearFields"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+
+        <TableView fx:id="productsTable" layoutX="300" layoutY="20" prefWidth="600" prefHeight="400">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+                <TableColumn fx:id="nameColumn" text="Name" prefWidth="100"/>
+                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="150"/>
+                <TableColumn fx:id="priceColumn" text="Price" prefWidth="50"/>
+                <TableColumn fx:id="quantityColumn" text="Quantity" prefWidth="50"/>
+                <TableColumn fx:id="imageColumn" text="Image Path" prefWidth="150"/>
+                <TableColumn fx:id="categoryColumn" text="Category ID" prefWidth="50"/>
+            </columns>
+        </TableView>
+    </children>
+</AnchorPane>
