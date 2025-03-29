@@ -41,11 +41,8 @@
                     </children>
                 </HBox>
                 <HBox spacing="10">
-                    <children>
-                        <Label text="Category ID:"/>
-                        <TextField fx:id="categoryField" prefWidth="200"/>
-                    </children>
-                </HBox>
+                    <Label text="Category:"/>
+                    <ComboBox fx:id="categoryCombo" promptText="Select Category" />                </HBox>
                 <HBox spacing="10">
                     <children>
                         <Button text="Add" onAction="#ajouterProduit"/>

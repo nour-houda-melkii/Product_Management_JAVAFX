@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.cell.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.CategoryController" spacing="10" padding="10">
+
+    <TableView fx:id="categoryTable">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="nameColumn" text="Name" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Label text="Category Name:"/>
+        <TextField fx:id="nameField" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Button text="Add" onAction="#addCategory"/>
+        <Button text="Update" onAction="#updateCategory"/>
+        <Button text="Delete" onAction="#deleteCategory"/>
+    </HBox>
+</VBox>

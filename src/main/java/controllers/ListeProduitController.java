@@ -1,5 +1,7 @@
 package controllers;
 
+import Services.CategoryServices;
+import entities.Category;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -55,13 +57,14 @@ public class ListeProduitController {
     @FXML
     private TextField nameField;
 
-    @FXML
-    private TableColumn<Produit, Integer> categoryColumn;
 
     @FXML
-    private TextField categoryField;
+    private ComboBox<Category> categoryCombo;
+
 
     private ProduitServices produitService = new ProduitServices();
+    private final CategoryServices categoryService = new CategoryServices();
+
 
     public void initialize() throws SQLException {
         // Configure table columns
@@ -71,7 +74,7 @@ public class ListeProduitController {
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         imageColumn.setCellValueFactory(new PropertyValueFactory<>("imagePath"));
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryId"));
+        loadCategories();
 
         // Load data
         loadProducts();
@@ -82,6 +85,12 @@ public class ListeProduitController {
                 populateFields(newValue);
             }
         });
+    }
+
+    private void loadCategories() throws SQLException {
+        categoryCombo.setItems(FXCollections.observableArrayList(
+                categoryService.showAll()
+        ));
     }
 
     private void loadProducts() throws SQLException {
@@ -96,7 +105,6 @@ public class ListeProduitController {
         priceField.setText(String.valueOf(produit.getPrice()));
         quantityField.setText(String.valueOf(produit.getQuantity()));
         imageField.setText(produit.getImagePath());
-        categoryField.setText(String.valueOf(produit.getCategoryId()));
     }
 
     @FXML
@@ -111,6 +119,7 @@ public class ListeProduitController {
 
         productsTable.getItems().add(produit);
         clearFields();
+
     }
 
     @FXML
@@ -152,42 +161,31 @@ public class ListeProduitController {
     private boolean validateFields() {
         if (nameField.getText().isEmpty() || descriptionField.getText().isEmpty() ||
                 priceField.getText().isEmpty() || quantityField.getText().isEmpty() ||
-                imageField.getText().isEmpty() || categoryField.getText().isEmpty()) {
+                imageField.getText().isEmpty() || categoryCombo.getValue() == null) {
 
-            showAlert(Alert.AlertType.WARNING, "Avertissement", "Tous les champs doivent être remplis !");
+            showAlert(Alert.AlertType.WARNING, "Warning", "All fields must be filled!");
             return false;
         }
 
         try {
             double price = Double.parseDouble(priceField.getText());
             if (price < 0) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Le prix doit être un nombre positif !");
+                showAlert(Alert.AlertType.ERROR, "Error", "Price must be positive!");
                 return false;
             }
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Le prix doit être un nombre valide !");
+            showAlert(Alert.AlertType.ERROR, "Error", "Price must be a valid number!");
             return false;
         }
 
         try {
             int quantity = Integer.parseInt(quantityField.getText());
             if (quantity < 0) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "La quantité doit être un nombre positif !");
+                showAlert(Alert.AlertType.ERROR, "Error", "Quantity must be positive!");
                 return false;
             }
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "La quantité doit être un nombre entier valide !");
-            return false;
-        }
-
-        try {
-            int categoryId = Integer.parseInt(categoryField.getText());
-            if (categoryId < 0) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "L'ID de catégorie doit être un nombre positif !");
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "L'ID de catégorie doit être un nombre entier valide !");
+            showAlert(Alert.AlertType.ERROR, "Error", "Quantity must be a valid integer!");
             return false;
         }
 
@@ -200,8 +198,10 @@ public class ListeProduitController {
         produit.setPrice(Double.parseDouble(priceField.getText()));
         produit.setQuantity(Integer.parseInt(quantityField.getText()));
         produit.setImagePath(imageField.getText());
-        produit.setCategoryId(Integer.parseInt(categoryField.getText()));
+        produit.setCategoryId(categoryCombo.getValue().getId()); // Get ID from selected category
     }
+
+
 
     @FXML
     private void clearFields() {
@@ -210,7 +210,8 @@ public class ListeProduitController {
         priceField.clear();
         quantityField.clear();
         imageField.clear();
-        categoryField.clear();
+        categoryCombo.getSelectionModel().clearSelection();
+
     }
 
     @FXML
