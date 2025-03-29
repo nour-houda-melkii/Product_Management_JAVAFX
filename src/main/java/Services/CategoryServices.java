@@ -75,4 +75,20 @@ public class CategoryServices {
         }
         return null;
     }
+
+    public Category findById(int id) throws SQLException {
+        String query = "SELECT * FROM category WHERE id = ?";
+        Connection connection = null;
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return new Category(
+                        rs.getInt("id"),
+                        rs.getString("name")
+                );
+            }
+        }
+        return null;
+    }
 }

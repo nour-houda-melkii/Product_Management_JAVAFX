@@ -7,21 +7,23 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.control.Button;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ProductFrontController {
+public class AdminDashboardController {
     @FXML
     private FlowPane productContainer;
 
@@ -76,26 +78,65 @@ public class ProductFrontController {
         Label priceLabel = new Label(String.format("$%.2f", product.getPrice()));
         priceLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #16a085; -fx-padding: 0 10 5 10;");
 
-        // Description label
-        Label descLabel = new Label(product.getDescription());
-        descLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #7f8c8d; -fx-padding: 0 10 0 10;");
-        descLabel.setWrapText(true);
-
-        // Create container for buy button
+        // Create container for buttons
         HBox buttonBox = new HBox(10);
         buttonBox.setStyle("-fx-alignment: center; -fx-padding: 5 10 10 10;");
 
-        // Buy Button
-        Button buyButton = new Button("Add to Cart");
-        buyButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 4;");
-        buyButton.setOnAction(e -> showAlert("Shopping Cart", "Product '" + product.getName() + "' added to cart!"));
+        // Edit Button - Updated styling
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 4;");
+        editButton.setOnAction(e -> openEditForm(product));
 
-        // Add button to button container
-        buttonBox.getChildren().add(buyButton);
+        // Delete Button
+        Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 4;");
+        deleteButton.setOnAction(e -> deleteProduct(product));
+
+        // Add buttons to button container
+        buttonBox.getChildren().addAll(editButton, deleteButton);
 
         // Add all components to card
-        card.getChildren().addAll(imageContainer, nameLabel, priceLabel, descLabel, buttonBox);
+        card.getChildren().addAll(imageContainer, nameLabel, priceLabel, buttonBox);
         return card;
+    }
+
+    private void deleteProduct(Produit product) {
+        try {
+            ProduitServices produitService = new ProduitServices();
+            produitService.delete(product);
+            loadProductsInCardView(); // Refresh the view
+            showAlert("Success", "Product deleted successfully");
+        } catch (SQLException e) {
+            showAlert("Error", "Failed to delete product: " + e.getMessage());
+        }
+    }
+
+    private void openEditForm(Produit product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/listproduit.fxml"));
+            Parent root = loader.load();
+
+            ListeProduitController controller = loader.getController();
+            controller.setProductToEdit(product);
+
+            Stage popupStage = new Stage();
+            popupStage.setScene(new Scene(root));
+            popupStage.setTitle("Edit Product");
+            popupStage.initModality(Modality.APPLICATION_MODAL);
+            popupStage.showAndWait();
+
+            // Refresh after editing
+            loadProductsInCardView();
+
+        } catch (Exception e) {
+            System.err.println("CRITICAL ERROR OPENING EDIT FORM:");
+            e.printStackTrace();
+
+            showAlert("Critical Error",
+                    "Cannot open edit form:\n" +
+                            e.getClass().getSimpleName() + ": " + e.getMessage() +
+                            "\n\nCheck console for details");
+        }
     }
 
     private void loadProductImage(Produit product, ImageView imageView) {
@@ -124,15 +165,41 @@ public class ProductFrontController {
     }
 
     @FXML
-    private void handleBackToAdmin() {
+    private void handleTableViewButton() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/admin_dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/listproduit.fxml"));
             Stage stage = (Stage) productContainer.getScene().getWindow();
             stage.setScene(new Scene(loader.load()));
-            stage.setTitle("Admin Dashboard");
+            stage.setTitle("Product Table View");
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error", "Failed to return to admin dashboard");
+            showAlert("Error", "Failed to load table view");
+        }
+    }
+
+    @FXML
+    private void handleFrontView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/product_front.fxml"));
+            Stage stage = (Stage) productContainer.getScene().getWindow();
+            stage.setScene(new Scene(loader.load()));
+            stage.setTitle("Front View");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load front view");
+        }
+    }
+
+    @FXML
+    private void handleCategories() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/category.fxml"));
+            Stage stage = (Stage) productContainer.getScene().getWindow();
+            stage.setScene(new Scene(loader.load()));
+            stage.setTitle("Manage Categories");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load categories view");
         }
     }
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Label?>
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminDashboardController">
+    <!-- Top Navigation Bar -->
+    <HBox alignment="CENTER" layoutX="0.0" layoutY="0.0" prefHeight="50.0" prefWidth="800.0" spacing="20.0" style="-fx-background-color: #3498db;">
+        <Button fx:id="frontButton" onAction="#handleFrontView" prefHeight="40.0" prefWidth="150.0"
+                style="-fx-font-size: 16px; -fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+            <text>Front View</text>
+        </Button>
+        <Button fx:id="categoriesButton" onAction="#handleCategories" prefHeight="40.0" prefWidth="150.0"
+                style="-fx-font-size: 16px; -fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+            <text>Categories</text>
+        </Button>
+        <Button fx:id="tableViewButton" onAction="#handleTableViewButton" prefHeight="40.0" prefWidth="150.0"
+                style="-fx-font-size: 16px; -fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+            <text>Table View</text>
+        </Button>
+    </HBox>
+
+    <!-- Title -->
+    <Label alignment="CENTER" layoutX="0.0" layoutY="60.0" prefHeight="40.0" prefWidth="800.0"
+           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Product Management Dashboard" />
+
+    <!-- Product Container with styled scrollpane -->
+    <ScrollPane fitToWidth="true" layoutX="50.0" layoutY="110.0" prefHeight="470.0" prefWidth="700.0"
+                style="-fx-background-color: transparent; -fx-border-color: #e0e0e0; -fx-border-radius: 5;">
+        <FlowPane fx:id="productContainer" hgap="20" vgap="20" prefWidth="680.0" style="-fx-padding: 20;">
+        </FlowPane>
+    </ScrollPane>
+</AnchorPane>

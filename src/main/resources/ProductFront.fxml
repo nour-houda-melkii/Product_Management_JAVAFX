@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="controllers.ProductFrontController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ProductFrontController">
+    <!-- Top Navigation Bar -->
+    <HBox alignment="CENTER" layoutX="0.0" layoutY="0.0" prefHeight="50.0" prefWidth="800.0" spacing="20.0" style="-fx-background-color: #3498db;">
+        <Button fx:id="backButton" onAction="#handleBackToAdmin" prefHeight="40.0" prefWidth="150.0"
+                style="-fx-font-size: 16px; -fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+            <text>Back to Admin</text>
+        </Button>
+    </HBox>
 
-    <!-- Titre et bouton alignés à gauche -->
-    <top>
-        <HBox spacing="20" style="-fx-padding: 20px; -fx-alignment: center-left;">
-            <Label text="Nos Événements"
-                   style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-            <Button text="My Reservation"
-                    style="-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #28a745; -fx-text-fill: white;"
-                    fx:id="myReservationButton" onAction="#handleMyReservation"/>
-        </HBox>
-    </top>
+    <!-- Title -->
+    <Label alignment="CENTER" layoutX="0.0" layoutY="60.0" prefHeight="40.0" prefWidth="800.0"
+           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Product Store" />
 
-    <!-- Conteneur des cartes d'événements -->
-    <center>
-        <FlowPane fx:id="eventContainer" hgap="20" vgap="20"
-                  style="-fx-background-color: #f8f9fa; -fx-padding: 20px;"
-                  prefWidth="800" prefHeight="600"/>
-    </center>
-
-</BorderPane>
+    <!-- Product Container with styled scrollpane -->
+    <ScrollPane fitToWidth="true" layoutX="50.0" layoutY="110.0" prefHeight="470.0" prefWidth="700.0"
+                style="-fx-background-color: transparent; -fx-border-color: #e0e0e0; -fx-border-radius: 5;">
+        <FlowPane fx:id="productContainer" hgap="20" vgap="20" prefWidth="680.0" style="-fx-padding: 20;">
+        </FlowPane>
+    </ScrollPane>
+</AnchorPane>

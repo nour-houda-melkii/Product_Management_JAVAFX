@@ -2,15 +2,19 @@ package controllers;
 
 import Services.CategoryServices;
 import entities.Category;
+import entities.Produit;
+import Services.ProduitServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
-import entities.Produit;
-import Services.ProduitServices;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,14 +61,16 @@ public class ListeProduitController {
     @FXML
     private TextField nameField;
 
-
     @FXML
     private ComboBox<Category> categoryCombo;
 
+    @FXML
+    private TableColumn<Produit, Integer> categoryColumn;
 
     private ProduitServices produitService = new ProduitServices();
     private final CategoryServices categoryService = new CategoryServices();
 
+    private Produit productToEdit = null;
 
     public void initialize() throws SQLException {
         // Configure table columns
@@ -74,6 +80,8 @@ public class ListeProduitController {
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         imageColumn.setCellValueFactory(new PropertyValueFactory<>("imagePath"));
+        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryId"));
+
         loadCategories();
 
         // Load data
@@ -88,9 +96,34 @@ public class ListeProduitController {
     }
 
     private void loadCategories() throws SQLException {
-        categoryCombo.setItems(FXCollections.observableArrayList(
-                categoryService.showAll()
-        ));
+        List<Category> categories = categoryService.showAll();
+        categoryCombo.setItems(FXCollections.observableArrayList(categories));
+
+        // Set up a cell factory to display category names instead of toString()
+        categoryCombo.setCellFactory(param -> new ListCell<Category>() {
+            @Override
+            protected void updateItem(Category category, boolean empty) {
+                super.updateItem(category, empty);
+                if (empty || category == null) {
+                    setText(null);
+                } else {
+                    setText(category.getName());
+                }
+            }
+        });
+
+        // Same for the displayed value
+        categoryCombo.setButtonCell(new ListCell<Category>() {
+            @Override
+            protected void updateItem(Category category, boolean empty) {
+                super.updateItem(category, empty);
+                if (empty || category == null) {
+                    setText(null);
+                } else {
+                    setText(category.getName());
+                }
+            }
+        });
     }
 
     private void loadProducts() throws SQLException {
@@ -105,6 +138,21 @@ public class ListeProduitController {
         priceField.setText(String.valueOf(produit.getPrice()));
         quantityField.setText(String.valueOf(produit.getQuantity()));
         imageField.setText(produit.getImagePath());
+
+        // Set the category in the combo box
+        try {
+            for (Category category : categoryCombo.getItems()) {
+                if (category.getId() == produit.getCategoryId()) {
+                    categoryCombo.setValue(category);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Set this as the current product being edited
+        this.productToEdit = produit;
     }
 
     @FXML
@@ -120,25 +168,33 @@ public class ListeProduitController {
         productsTable.getItems().add(produit);
         clearFields();
 
+        showAlert(Alert.AlertType.INFORMATION, "Success", "Product added successfully!");
+    }
+
+    private void showAlert(Alert.AlertType alertType, String success, String s) {
     }
 
     @FXML
     void modifierProduit(ActionEvent event) {
         Produit selectedProduct = productsTable.getSelectionModel().getSelectedItem();
-        if (selectedProduct == null) {
-            showAlert(Alert.AlertType.WARNING, "Avertissement", "Aucun produit sélectionné !");
+        if (selectedProduct == null && productToEdit == null) {
+            showAlert(Alert.AlertType.WARNING, "Warning", "No product selected!");
             return;
         }
 
+        // Use either the selected product or the product passed from another screen
+        Produit productToUpdate = (selectedProduct != null) ? selectedProduct : productToEdit;
+
         if (!validateFields()) return;
 
-        populateProductFromFields(selectedProduct);
+        populateProductFromFields(productToUpdate);
 
         try {
-            produitService.update(selectedProduct);
-            productsTable.refresh();
+            produitService.update(productToUpdate);
+            loadProducts(); // Refresh the table
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Product updated successfully!");
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Échec de la mise à jour : " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to update: " + e.getMessage());
         }
     }
 
@@ -146,15 +202,17 @@ public class ListeProduitController {
     void supprimerProduit(ActionEvent event) {
         Produit selectedProduct = productsTable.getSelectionModel().getSelectedItem();
         if (selectedProduct == null) {
-            showAlert(Alert.AlertType.WARNING, "Avertissement", "Aucun produit sélectionné !");
+            showAlert(Alert.AlertType.WARNING, "Warning", "No product selected!");
             return;
         }
 
         try {
             produitService.delete(selectedProduct);
             productsTable.getItems().remove(selectedProduct);
+            clearFields();
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Product deleted successfully!");
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Échec de la suppression : " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete: " + e.getMessage());
         }
     }
 
@@ -198,10 +256,8 @@ public class ListeProduitController {
         produit.setPrice(Double.parseDouble(priceField.getText()));
         produit.setQuantity(Integer.parseInt(quantityField.getText()));
         produit.setImagePath(imageField.getText());
-        produit.setCategoryId(categoryCombo.getValue().getId()); // Get ID from selected category
+        produit.setCategoryId(categoryCombo.getValue().getId());
     }
-
-
 
     @FXML
     private void clearFields() {
@@ -211,7 +267,7 @@ public class ListeProduitController {
         quantityField.clear();
         imageField.clear();
         categoryCombo.getSelectionModel().clearSelection();
-
+        this.productToEdit = null;
     }
 
     @FXML
@@ -231,18 +287,12 @@ public class ListeProduitController {
 
                 File destinationFile = new File(destinationDir, selectedFile.getName());
                 Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                imageField.setText(destinationFile.getAbsolutePath());
-            } catch (IOException e) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'enregistrer l'image : " + e.getMessage());
-            }
-        }
-    }
+        } catch (IOException e) {
+                throw new RuntimeException(e);
+            } finally {
 
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+                }}}
+
+    public void setProductToEdit(Produit product) {
     }
 }
