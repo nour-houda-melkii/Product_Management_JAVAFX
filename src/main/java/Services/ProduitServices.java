@@ -92,4 +92,8 @@ public class ProduitServices implements CRUD<Produit> {
 
         return products;
     }
+
+    public PreparedStatement getConnection() {
+        return null;
+    }
 }

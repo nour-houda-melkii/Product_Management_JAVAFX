@@ -280,18 +280,24 @@ public class ListeProduitController {
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             try {
-                File destinationDir = new File("src/main/resources/images");
-                if (!destinationDir.exists()) {
-                    destinationDir.mkdirs();
+                // Create the target directory if it doesn't exist
+                File targetDir = new File("src/main/resources/images");
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
                 }
 
-                File destinationFile = new File(destinationDir, selectedFile.getName());
-                Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-                throw new RuntimeException(e);
-            } finally {
+                // Copy the file to the target directory
+                File destFile = new File(targetDir, selectedFile.getName());
+                Files.copy(selectedFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-                }}}
+                // Set the relative path in the image field
+                imageField.setText("src/main/resources/images/" + selectedFile.getName());
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to copy image: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
 
     public void setProductToEdit(Produit product) {
     }

@@ -10,9 +10,10 @@ public class CategoryServices {
     private Connection con = DBConnection.getInstance().getCon();
 
     public int insert(Category category) throws SQLException {
-        String req = "INSERT INTO categories (name) VALUES (?)";
+        String req = "INSERT INTO categories (name, description) VALUES (?, ?)";
         try (PreparedStatement ps = con.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
             int affectedRows = ps.executeUpdate();
 
             if (affectedRows == 0) {
@@ -28,11 +29,13 @@ public class CategoryServices {
             }
         }
     }
+
     public int update(Category category) throws SQLException {
-        String req = "UPDATE categories SET name = ? WHERE id = ?";
+        String req = "UPDATE categories SET name = ?, description = ? WHERE id = ?";
         try (PreparedStatement ps = con.prepareStatement(req)) {
             ps.setString(1, category.getName());
-            ps.setInt(2, category.getId());
+            ps.setString(2, category.getDescription());
+            ps.setInt(3, category.getId());
             return ps.executeUpdate();
         }
     }
@@ -50,16 +53,17 @@ public class CategoryServices {
         String req = "SELECT * FROM categories";
         try (Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(req)) {
-
             while (rs.next()) {
                 categories.add(new Category(
                         rs.getInt("id"),
-                        rs.getString("name")
+                        rs.getString("name"),
+                        rs.getString("description")
                 ));
             }
         }
         return categories;
     }
+
     public Category getCategoryById(int id) throws SQLException {
         String req = "SELECT * FROM categories WHERE id = ?";
         try (PreparedStatement ps = con.prepareStatement(req)) {
@@ -68,25 +72,10 @@ public class CategoryServices {
                 if (rs.next()) {
                     return new Category(
                             rs.getInt("id"),
-                            rs.getString("name")
+                            rs.getString("name"),
+                            rs.getString("description")
                     );
                 }
-            }
-        }
-        return null;
-    }
-
-    public Category findById(int id) throws SQLException {
-        String query = "SELECT * FROM category WHERE id = ?";
-        Connection connection = null;
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, id);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return new Category(
-                        rs.getInt("id"),
-                        rs.getString("name")
-                );
             }
         }
         return null;

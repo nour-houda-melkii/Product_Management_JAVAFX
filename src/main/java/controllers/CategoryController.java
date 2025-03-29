@@ -15,6 +15,8 @@ public class CategoryController {
     @FXML private TableColumn<Category, Number> idColumn;
     @FXML private TableColumn<Category, String> nameColumn;
     @FXML private TextField nameField;
+    @FXML private TextField descriptionField;
+
 
     private final CategoryServices categoryService = new CategoryServices();
     private final ObservableList<Category> categories = FXCollections.observableArrayList();
@@ -37,6 +39,7 @@ public class CategoryController {
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         nameField.setText(newSelection.getName());
+                        descriptionField.setText(newSelection.getDescription());
                     }
                 });
     }
@@ -49,6 +52,8 @@ public class CategoryController {
     @FXML
     private void addCategory() {
         String name = nameField.getText().trim();
+        String description = descriptionField.getText().trim();
+
         if (name.isEmpty()) {
             showAlert("Input Error", "Category name cannot be empty");
             return;
@@ -60,15 +65,17 @@ public class CategoryController {
         }
 
         try {
-            Category category = new Category(name);
+            Category category = new Category(name, description);
             categoryService.insert(category);
             loadCategories();
             nameField.clear();
+            descriptionField.clear();
         } catch (SQLException e) {
             showAlert("Database Error", "Failed to add category: " + e.getMessage());
         }
     }
 
+    // Update the updateCategory method
     @FXML
     private void updateCategory() {
         Category selected = categoryTable.getSelectionModel().getSelectedItem();
@@ -78,6 +85,8 @@ public class CategoryController {
         }
 
         String newName = nameField.getText().trim();
+        String newDescription = descriptionField.getText().trim();
+
         if (newName.isEmpty()) {
             showAlert("Input Error", "Category name cannot be empty");
             return;
@@ -85,6 +94,7 @@ public class CategoryController {
 
         try {
             selected.setName(newName);
+            selected.setDescription(newDescription);
             categoryService.update(selected);
             loadCategories();
         } catch (SQLException e) {
