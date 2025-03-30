@@ -11,6 +11,11 @@
         <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
     </padding>
 
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Back to Dashboard" onAction="#navigateToDashboard"
+                style="-fx-background-color: #607D8B; -fx-text-fill: white;"/>
+    </HBox>
+
     <TableView fx:id="categoryTable">
         <columns>
             <TableColumn fx:id="nameColumn" text="Name" prefWidth="200"/>

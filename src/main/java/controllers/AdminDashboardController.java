@@ -141,26 +141,48 @@ public class AdminDashboardController {
 
     private void loadProductImage(Produit product, ImageView imageView) {
         try {
-            if (product.getImagePath() != null && !product.getImagePath().isEmpty()) {
-                File file = new File(product.getImagePath());
-                if (file.exists()) {
-                    imageView.setImage(new Image(file.toURI().toString()));
-                } else {
-                    // Set a default placeholder image
-                    imageView.setImage(new Image(getClass().getResourceAsStream("/images/placeholder.png")));
-                }
+            String imagePath = product.getImagePath();
+
+            // Handle cases where path might be null or empty
+            if (imagePath == null || imagePath.isEmpty()) {
+                setPlaceholderImage(imageView);
+                return;
+            }
+
+            // Handle both absolute and relative paths
+            Image image;
+            if (imagePath.startsWith("/"))
+            // Resource path (from JAR)
+            image = new Image(getClass().getResourceAsStream(imagePath));
+             if (imagePath.startsWith("file:")) {
+                // Absolute file path
+                image = new Image(imagePath);
             } else {
-                // Set a default placeholder image
-                imageView.setImage(new Image(getClass().getResourceAsStream("/images/placeholder.png")));
+                // Relative path - try both resource and file system
+                try {
+                    // First try as resource
+                    image = new Image(getClass().getResourceAsStream("/images/" + imagePath));
+                } catch (Exception e) {
+                    // Fall back to file system
+                    image = new Image(new File(imagePath).toURI().toString());
+                }
             }
+
+            imageView.setImage(image);
         } catch (Exception e) {
+            System.err.println("Error loading image for product: " + product.getName());
             e.printStackTrace();
-            // Set a default placeholder image in case of error
-            try {
-                imageView.setImage(new Image(getClass().getResourceAsStream("/images/placeholder.png")));
-            } catch (Exception ex) {
-                // If placeholder can't be loaded, leave it empty
-            }
+            setPlaceholderImage(imageView);
+        }
+    }
+
+    private void setPlaceholderImage(ImageView imageView) {
+        try {
+            Image placeholder = new Image(getClass().getResourceAsStream("/images/placeholder.png"));
+            imageView.setImage(placeholder);
+        } catch (Exception e) {
+            // Ultimate fallback - blank image
+            imageView.setImage(null);
         }
     }
 
@@ -180,16 +202,31 @@ public class AdminDashboardController {
     @FXML
     private void handleFrontView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/product_front.fxml"));
+            // Get the resource URL to verify it exists
+            java.net.URL resourceUrl = getClass().getResource("/product_client.fxml");
+
+            if (resourceUrl == null) {
+                showAlert("Error", "Could not find resource: /product_client.fxml");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(resourceUrl);
+            Parent root = loader.load();
+
+            // Get the current stage
             Stage stage = (Stage) productContainer.getScene().getWindow();
-            stage.setScene(new Scene(loader.load()));
+
+            // Set the new scene
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.setTitle("Front View");
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error", "Failed to load front view");
+            showAlert("Error", "Failed to load front view: " + e.getMessage() +
+                    "\nResource URL: " + getClass().getResource("/product_client.fxml"));
         }
     }
-
     @FXML
     private void handleCategories() {
         try {

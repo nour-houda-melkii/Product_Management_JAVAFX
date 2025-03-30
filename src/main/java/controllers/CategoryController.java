@@ -5,9 +5,14 @@ import Services.CategoryServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class CategoryController {
@@ -42,7 +47,24 @@ public class CategoryController {
                     }
                 });
     }
+    @FXML
+    private void navigateToDashboard() {
+        try {
+            // Load the admin dashboard FXML file from the correct path
+            Parent root = FXMLLoader.load(getClass().getResource("/admin_dashboard.fxml"));
 
+            // Get the current stage
+            Stage stage = (Stage) categoryTable.getScene().getWindow();
+
+            // Set the new scene
+            stage.setScene(new Scene(root));
+            stage.setTitle("Admin Dashboard");
+            stage.show();
+        } catch (IOException e) {
+            showAlert("Navigation Error", "Failed to load dashboard: " + e.getMessage());
+            e.printStackTrace(); // This will help you debug if there are issues
+        }
+    }
     private void loadCategories() throws SQLException {
         categories.setAll(categoryService.showAll());
         categoryTable.setItems(categories);

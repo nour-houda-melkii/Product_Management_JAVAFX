@@ -301,4 +301,7 @@ public class ListeProduitController {
 
     public void setProductToEdit(Produit product) {
     }
+
+    public void handleBackToAdmin(ActionEvent actionEvent) {
+    }
 }
