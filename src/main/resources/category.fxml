@@ -13,7 +13,6 @@
 
     <TableView fx:id="categoryTable">
         <columns>
-            <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
             <TableColumn fx:id="nameColumn" text="Name" prefWidth="200"/>
             <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
         </columns>

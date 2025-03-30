@@ -12,11 +12,10 @@ import java.sql.SQLException;
 
 public class CategoryController {
     @FXML private TableView<Category> categoryTable;
-    @FXML private TableColumn<Category, Number> idColumn;
     @FXML private TableColumn<Category, String> nameColumn;
+    @FXML private TableColumn<Category, String> descriptionColumn;
     @FXML private TextField nameField;
     @FXML private TextField descriptionField;
-
 
     private final CategoryServices categoryService = new CategoryServices();
     private final ObservableList<Category> categories = FXCollections.observableArrayList();
@@ -24,8 +23,8 @@ public class CategoryController {
     @FXML
     public void initialize() {
         // Initialize columns
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
         // Load data
         try {
@@ -68,14 +67,12 @@ public class CategoryController {
             Category category = new Category(name, description);
             categoryService.insert(category);
             loadCategories();
-            nameField.clear();
-            descriptionField.clear();
+            clearFields();
         } catch (SQLException e) {
             showAlert("Database Error", "Failed to add category: " + e.getMessage());
         }
     }
 
-    // Update the updateCategory method
     @FXML
     private void updateCategory() {
         Category selected = categoryTable.getSelectionModel().getSelectedItem();
@@ -97,6 +94,7 @@ public class CategoryController {
             selected.setDescription(newDescription);
             categoryService.update(selected);
             loadCategories();
+            clearFields();
         } catch (SQLException e) {
             showAlert("Database Error", "Failed to update category: " + e.getMessage());
         }
@@ -113,10 +111,15 @@ public class CategoryController {
         try {
             categoryService.delete(selected);
             loadCategories();
-            nameField.clear();
+            clearFields();
         } catch (SQLException e) {
             showAlert("Database Error", "Failed to delete category: " + e.getMessage());
         }
+    }
+
+    private void clearFields() {
+        nameField.clear();
+        descriptionField.clear();
     }
 
     private void showAlert(String title, String message) {
