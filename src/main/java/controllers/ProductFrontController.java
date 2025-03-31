@@ -249,7 +249,8 @@ public class ProductFrontController {
             stage.setTitle("Favorites");
             stage.show();
         } catch (IOException e) {
-            showAlert("Error", "Failed to open favorites view");
+            e.printStackTrace();
+            showAlert("Error", "Failed to open favorites view: " + e.getMessage());
         }
     }
 

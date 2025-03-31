@@ -1,58 +1,78 @@
 package controllers;
 
 import entities.Produit;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.scene.control.TableCell;
+import javafx.stage.Stage;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class FavoritesViewController {
-    @FXML
-    private FlowPane favoritesContainer;
+    @FXML private TableView<Produit> favoritesTableView;
+    @FXML private TableColumn<Produit, String> nameColumn;
+    @FXML private TableColumn<Produit, Double> priceColumn;
+    @FXML private TableColumn<Produit, String> descriptionColumn;
+    @FXML private TableColumn<Produit, String> actionColumn;
 
     private List<Produit> favoriteProducts;
+    private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+
+    @FXML
+    public void initialize() {
+        configureTableColumns();
+    }
+
+    private void configureTableColumns() {
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        priceColumn.setCellFactory(column -> new TableCell<Produit, Double>() {
+            @Override protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                setText(empty || price == null ? "" : currencyFormat.format(price));
+            }
+        });
+
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+        actionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(""));
+        actionColumn.setCellFactory(col -> new TableButtonCell());
+    }
 
     public void setFavoriteProducts(List<Produit> favoriteProducts) {
         this.favoriteProducts = favoriteProducts;
-        displayFavorites();
+        favoritesTableView.setItems(FXCollections.observableArrayList(favoriteProducts));
     }
 
-    private void displayFavorites() {
-        favoritesContainer.getChildren().clear();
+    private class TableButtonCell extends TableCell<Produit, String> {
+        private final Button removeButton = new Button("Remove");
 
-        if (favoriteProducts.isEmpty()) {
-            Label emptyLabel = new Label("You don't have any favorite products yet.");
-            favoritesContainer.getChildren().add(emptyLabel);
-            return;
+        TableButtonCell() {
+            removeButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
+            removeButton.setOnAction(event -> {
+                Produit product = getTableView().getItems().get(getIndex());
+                favoriteProducts.removeIf(p -> p.getId() == product.getId());
+                getTableView().getItems().remove(product);
+            });
         }
 
-        for (Produit product : favoriteProducts) {
-            VBox card = createFavoriteCard(product);
-            favoritesContainer.getChildren().add(card);
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            setGraphic(empty ? null : removeButton);
         }
-    }
-
-    private VBox createFavoriteCard(Produit product) {
-        // Similar to your product card but simplified for favorites
-        VBox card = new VBox(10);
-        card.setStyle("-fx-padding: 10; -fx-background-color: #f8f8f8; -fx-border-radius: 5;");
-
-        Label nameLabel = new Label(product.getName());
-        nameLabel.setStyle("-fx-font-weight: bold;");
-
-        Label priceLabel = new Label(String.format("$%.2f", product.getPrice()));
-
-        card.getChildren().addAll(nameLabel, priceLabel);
-        return card;
     }
 
     @FXML
-    private void handleBackToProducts() {
-        // Implement navigation back to products view
-    }
-
-    public void handleClose(ActionEvent actionEvent) {
+    public void handleClose() {
+        ((Stage) favoritesTableView.getScene().getWindow()).close();
     }
 }
