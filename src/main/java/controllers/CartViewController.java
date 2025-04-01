@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.*;
 
@@ -30,15 +31,28 @@ public class CartViewController {
     @FXML private TableColumn<Produit, String> actionColumn;
     @FXML private Label totalAmountLabel;
     @FXML private TextField emailField;
+    @FXML private PasswordField passwordField;
 
     private List<Produit> cartProducts;
     private Map<Integer, Integer> productQuantities = new HashMap<>();
     private String orderReference;
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
 
+    // Email configuration
+    private static final String EMAIL_HOST = "smtp.gmail.com";
+    private static final String EMAIL_PORT = "587";
+    private static final String SENDER_EMAIL = "nourmelki05@gmail.com"; // Change to your store email
+    private static final String SENDER_PASSWORD = "inom yuqm ciop jorf"; // Use app password for Gmail
+
     @FXML
     public void initialize() {
         configureTableColumns();
+        // Generate a unique order reference on initialization
+        orderReference = generateOrderReference();
+    }
+
+    private String generateOrderReference() {
+        return "ORD-" + System.currentTimeMillis() + "-" + new Random().nextInt(1000);
     }
 
     private void configureTableColumns() {
@@ -74,7 +88,6 @@ public class CartViewController {
         actionColumn.setCellFactory(col -> new TableButtonCell());
     }
 
-
     private void updateTotal() {
         double total = 0;
         for (Produit product : cartProducts) {
@@ -84,7 +97,6 @@ public class CartViewController {
         totalAmountLabel.setText(currencyFormat.format(total));
     }
 
-
     @FXML
     private void handleCheckout() {
         if (cartProducts.isEmpty()) {
@@ -92,13 +104,20 @@ public class CartViewController {
             return;
         }
 
+        // Check if email is valid
         if (emailField == null || emailField.getText().isEmpty() || !isValidEmail(emailField.getText())) {
             showAlert("Invalid Email", "Please enter a valid email address to continue.");
             return;
         }
 
+        // Check if password is entered
+        if (passwordField == null || passwordField.getText().isEmpty()) {
+            showAlert("Missing Password", "Please enter your password to continue.");
+            return;
+        }
+
         // Send confirmation email
-        boolean emailSent = sendConfirmationEmail(emailField.getText());
+        boolean emailSent = sendConfirmationEmail(emailField.getText(), passwordField.getText());
 
         if (emailSent) {
             // Show confirmation dialog
@@ -129,30 +148,76 @@ public class CartViewController {
         return email.matches(emailRegex);
     }
 
-    private boolean sendConfirmationEmail(String email) {
-        // This is a placeholder for actual email sending
-        // In a real application, you would implement SMTP email sending here
+    private boolean sendConfirmationEmail(String toEmail, String password) {
         try {
-            // For demonstration purposes, we'll just simulate success
-            // In production code, you would use JavaMail API to send actual emails
+            // Set up mail server properties
+            Properties properties = new Properties();
+            properties.put("mail.smtp.host", EMAIL_HOST);
+            properties.put("mail.smtp.port", EMAIL_PORT);
+            properties.put("mail.smtp.auth", "true");
+            properties.put("mail.smtp.starttls.enable", "true");
 
-            System.out.println("Sending confirmation email to: " + email);
-            System.out.println("Order reference: " + orderReference);
-            System.out.println("Total amount: " + totalAmountLabel.getText());
+            // Create authenticator with customer credentials
+            Authenticator auth = new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(SENDER_EMAIL, SENDER_PASSWORD);
+                }
+            };
 
-            // List products in the order
+            // Create mail session
+            Session session = Session.getInstance(properties, auth);
+
+            // Create the email message
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(SENDER_EMAIL));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
+            message.setSubject("Order Confirmation - " + orderReference);
+
+            // Build email content
+            StringBuilder emailContent = new StringBuilder();
+            emailContent.append("<html><body>");
+            emailContent.append("<h2>Thank you for your order!</h2>");
+            emailContent.append("<p>Dear Customer,</p>");
+            emailContent.append("<p>Your order has been confirmed.</p>");
+            emailContent.append("<p><b>Order Reference:</b> ").append(orderReference).append("</p>");
+            emailContent.append("<p><b>Total Amount:</b> ").append(totalAmountLabel.getText()).append("</p>");
+
+            emailContent.append("<h3>Order Details:</h3>");
+            emailContent.append("<table border='1' style='border-collapse: collapse;'>");
+            emailContent.append("<tr><th>Product</th><th>Quantity</th><th>Price</th><th>Total</th></tr>");
+
             for (Produit product : cartTableView.getItems()) {
                 int quantity = productQuantities.getOrDefault(product.getId(), 1);
-                System.out.println(" - " + product.getName() + " x " + quantity +
-                        " = $" + (product.getPrice() * quantity));
+                double total = product.getPrice() * quantity;
+
+                emailContent.append("<tr>");
+                emailContent.append("<td>").append(product.getName()).append("</td>");
+                emailContent.append("<td align='center'>").append(quantity).append("</td>");
+                emailContent.append("<td align='right'>").append(currencyFormat.format(product.getPrice())).append("</td>");
+                emailContent.append("<td align='right'>").append(currencyFormat.format(total)).append("</td>");
+                emailContent.append("</tr>");
             }
 
+            emailContent.append("</table>");
+            emailContent.append("<p>Thank you for shopping with us!</p>");
+            emailContent.append("<p>Best regards,<br/>Your Store Team</p>");
+            emailContent.append("</body></html>");
+
+            // Set email content
+            message.setContent(emailContent.toString(), "text/html");
+
+            // Send the email
+            Transport.send(message);
+
+            System.out.println("Confirmation email sent successfully to: " + toEmail);
             return true;
-        } catch (Exception e) {
+        } catch (MessagingException e) {
             e.printStackTrace();
+            System.err.println("Failed to send email: " + e.getMessage());
             return false;
         }
     }
+
     private void showQRCode() {
         try {
             StringBuilder qrContent = new StringBuilder();
@@ -194,22 +259,15 @@ public class CartViewController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     public void setCartProducts(List<Produit> cartProducts) {
         this.cartProducts = cartProducts;
         cartTableView.setItems(FXCollections.observableArrayList(cartProducts));
         updateTotal();
     }
+
     private class TableButtonCell extends TableCell<Produit, String> {
         private final Button removeButton = new Button("Remove");
-
-        private void updateTotal() {
-            double total = 0;
-            for (Produit product : cartProducts) {
-                int quantity = productQuantities.getOrDefault(product.getId(), 1);
-                total += product.getPrice() * quantity;
-            }
-            totalAmountLabel.setText(currencyFormat.format(total));
-        }
 
         TableButtonCell() {
             removeButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
@@ -240,7 +298,6 @@ public class CartViewController {
     private void handleClose() {
         ((Stage) totalAmountLabel.getScene().getWindow()).close();
     }
-
 
     @FXML
     private void handleViewCart() {
