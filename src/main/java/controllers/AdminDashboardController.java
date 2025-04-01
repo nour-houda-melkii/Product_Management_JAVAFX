@@ -247,4 +247,6 @@ public class AdminDashboardController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+ 
 }

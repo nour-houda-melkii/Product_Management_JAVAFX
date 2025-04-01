@@ -1,6 +1,7 @@
 package controllers;
 
 import Services.CategoryServices;
+import Services.AIDescriptionService;
 import entities.Category;
 import entities.Produit;
 import Services.ProduitServices;
@@ -67,8 +68,12 @@ public class ListeProduitController {
     @FXML
     private TableColumn<Produit, Integer> categoryColumn;
 
+    @FXML
+    private Button generateDescriptionButton;
+
     private ProduitServices produitService = new ProduitServices();
     private final CategoryServices categoryService = new CategoryServices();
+    private final AIDescriptionService aiService = new AIDescriptionService();
 
     private Produit productToEdit = null;
 
@@ -93,6 +98,34 @@ public class ListeProduitController {
                 populateFields(newValue);
             }
         });
+
+        // Add listener to name field to enable generate button only when name is entered
+        nameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            generateDescriptionButton.setDisable(newValue == null || newValue.trim().isEmpty());
+        });
+
+        // Initially disable the generate button
+        generateDescriptionButton.setDisable(true);
+    }
+
+    @FXML
+    private void generateAIDescription() {
+        String productName = nameField.getText().trim();
+        if (!productName.isEmpty()) {
+            // Show loading indicator
+            descriptionField.setText("Generating description...");
+
+            // In a real application, you would want to do this in a background thread
+            // to avoid freezing the UI during API calls
+            new Thread(() -> {
+                String generatedDescription = aiService.generateProductDescription(productName);
+
+                // Update UI on the JavaFX application thread
+                javafx.application.Platform.runLater(() -> {
+                    descriptionField.setText(generatedDescription);
+                });
+            }).start();
+        }
     }
 
     private void loadCategories() throws SQLException {
@@ -168,10 +201,7 @@ public class ListeProduitController {
         productsTable.getItems().add(produit);
         clearFields();
 
-        showAlert(Alert.AlertType.INFORMATION, "Success", "Product added successfully!");
-    }
-
-    private void showAlert(Alert.AlertType alertType, String success, String s) {
+        showSuccessAlert("Success", "Product added successfully!");
     }
 
     @FXML
@@ -192,7 +222,7 @@ public class ListeProduitController {
         try {
             produitService.update(productToUpdate);
             loadProducts(); // Refresh the table
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Product updated successfully!");
+            showSuccessAlert("Success", "Product updated successfully!");
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to update: " + e.getMessage());
         }
@@ -210,7 +240,7 @@ public class ListeProduitController {
             produitService.delete(selectedProduct);
             productsTable.getItems().remove(selectedProduct);
             clearFields();
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Product deleted successfully!");
+            showSuccessAlert("Success", "Product deleted successfully!");
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete: " + e.getMessage());
         }
@@ -300,8 +330,37 @@ public class ListeProduitController {
     }
 
     public void setProductToEdit(Produit product) {
+        this.productToEdit = product;
+        if (product != null) {
+            populateFields(product);
+        }
     }
 
     public void handleBackToAdmin(ActionEvent actionEvent) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/admin_dashboard.fxml"));
+            Stage stage = (Stage) nameField.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Admin Dashboard");
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Failed to navigate back: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void showSuccessAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

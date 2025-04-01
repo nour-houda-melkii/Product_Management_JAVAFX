@@ -4,65 +4,80 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ListeProduitController">
     <children>
         <VBox layoutX="20" layoutY="20" spacing="10">
             <children>
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <Button text="Back to Dashboard" onAction="#handleBackToAdmin"
+                            style="-fx-background-color: #607D8B; -fx-text-fill: white;"/>
+                </HBox>
+
                 <HBox spacing="10">
                     <children>
-                        <Label text="Name:"/>
+                        <Label text="Name:" prefWidth="100"/>
                         <TextField fx:id="nameField" prefWidth="200"/>
+                        <Button fx:id="generateDescriptionButton" text="Generate AI Description"
+                                onAction="#generateAIDescription"
+                                style="-fx-background-color: #9C27B0; -fx-text-fill: white;"/>
                     </children>
                 </HBox>
                 <HBox spacing="10">
                     <children>
-                        <Label text="Description:"/>
-                        <TextField fx:id="descriptionField" prefWidth="200"/>
+                        <Label text="Description:" prefWidth="100"/>
+                        <TextField fx:id="descriptionField" prefWidth="400"/>
                     </children>
                 </HBox>
                 <HBox spacing="10">
                     <children>
-                        <Label text="Price:"/>
+                        <Label text="Price:" prefWidth="100"/>
                         <TextField fx:id="priceField" prefWidth="200"/>
                     </children>
                 </HBox>
                 <HBox spacing="10">
                     <children>
-                        <Label text="Quantity:"/>
+                        <Label text="Quantity:" prefWidth="100"/>
                         <TextField fx:id="quantityField" prefWidth="200"/>
                     </children>
                 </HBox>
                 <HBox spacing="10">
                     <children>
-                        <Label text="Image:"/>
-                        <TextField fx:id="imageField" prefWidth="150" editable="false"/>
-                        <Button text="Choose Image" onAction="#choisirImage"/>
+                        <Label text="Image:" prefWidth="100"/>
+                        <TextField fx:id="imageField" prefWidth="200" editable="false"/>
+                        <Button text="Choose Image" onAction="#choisirImage"
+                                style="-fx-background-color: #FF9800; -fx-text-fill: white;"/>
                     </children>
                 </HBox>
                 <HBox spacing="10">
-                    <Label text="Category:"/>
-                    <ComboBox fx:id="categoryCombo" promptText="Select Category" />                </HBox>
-                <HBox spacing="10">
+                    <Label text="Category:" prefWidth="100"/>
+                    <ComboBox fx:id="categoryCombo" prefWidth="200" promptText="Select Category" />
+                </HBox>
+                <HBox spacing="10" style="-fx-padding: 10;">
                     <children>
-                        <Button text="Add" onAction="#ajouterProduit"/>
-                        <Button text="Update" onAction="#modifierProduit"/>
-                        <Button text="Delete" onAction="#supprimerProduit"/>
-                        <Button text="Clear" onAction="#clearFields"/>
+                        <Button text="Add" onAction="#ajouterProduit"
+                                style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                        <Button text="Update" onAction="#modifierProduit"
+                                style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+                        <Button text="Delete" onAction="#supprimerProduit"
+                                style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+                        <Button text="Clear" onAction="#clearFields"
+                                style="-fx-background-color: #607D8B; -fx-text-fill: white;"/>
                     </children>
                 </HBox>
             </children>
         </VBox>
 
-        <TableView fx:id="productsTable" layoutX="300" layoutY="20" prefWidth="600" prefHeight="400">
+        <TableView fx:id="productsTable" layoutX="20" layoutY="300" prefWidth="900" prefHeight="350">
             <columns>
                 <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
-                <TableColumn fx:id="nameColumn" text="Name" prefWidth="100"/>
-                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="150"/>
-                <TableColumn fx:id="priceColumn" text="Price" prefWidth="50"/>
-                <TableColumn fx:id="quantityColumn" text="Quantity" prefWidth="50"/>
-                <TableColumn fx:id="imageColumn" text="Image Path" prefWidth="150"/>
-                <TableColumn fx:id="categoryColumn" text="Category ID" prefWidth="50"/>
+                <TableColumn fx:id="nameColumn" text="Name" prefWidth="150"/>
+                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="250"/>
+                <TableColumn fx:id="priceColumn" text="Price" prefWidth="80"/>
+                <TableColumn fx:id="quantityColumn" text="Quantity" prefWidth="80"/>
+                <TableColumn fx:id="imageColumn" text="Image Path" prefWidth="200"/>
+                <TableColumn fx:id="categoryColumn" text="Category ID" prefWidth="80"/>
             </columns>
         </TableView>
     </children>
