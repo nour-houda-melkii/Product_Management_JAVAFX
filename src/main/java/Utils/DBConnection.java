@@ -37,4 +37,8 @@ public class DBConnection {
     public Connection getCon() {
         return con;
     }
+
+    public Connection getCnx() {
+        return null;
+    }
 }

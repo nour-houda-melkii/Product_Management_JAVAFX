@@ -32,6 +32,13 @@
             </font>
             <text>Table View</text>
         </Button>
+        <Button fx:id="statisticsButton" onAction="#handleStatistics" prefHeight="40.0" prefWidth="120.0"
+                style="-fx-font-size: 14px; -fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="14.0" />
+            </font>
+            <text>Statistics</text>
+        </Button>
 
     </HBox>
 

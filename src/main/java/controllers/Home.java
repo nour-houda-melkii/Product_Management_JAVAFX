@@ -17,17 +17,39 @@ public class Home extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            // Vérification du chemin du fichier FXML
-            String fxmlPath = "/category.fxml"; // Assurez-vous que le fichier est au bon endroit
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            // Load the face login screen instead of going directly to dashboard
+            String fxmlPath = "/face_login.fxml";
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Get controller to handle window close events
+            FaceLoginController controller = loader.getController();
+
             Scene scene = new Scene(root);
             stage.setScene(scene);
-            stage.setTitle("Liste des produits"); // Titre de la fenêtre
+            stage.setTitle("Admin Login - Face Recognition");
+
+            // Set up close handler to ensure webcam resources are released
+            stage.setOnCloseRequest(event -> {
+                controller.onWindowClosed();
+            });
+
             stage.show();
         } catch (IOException e) {
-            System.err.println("Erreur lors du chargement du fichier FXML: " + e.getMessage());
-            e.printStackTrace(); // Affiche la trace de l'exception pour faciliter le débogage
-        }
+            System.err.println("Error loading FXML file: " + e.getMessage());
+            e.printStackTrace();
 
+            // Fall back to admin dashboard if face login fails to load
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("/admin_dashboard.fxml"));
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.setTitle("Admin Dashboard");
+                stage.show();
+            } catch (IOException e2) {
+                System.err.println("Critical error: Unable to load any FXML file");
+                e2.printStackTrace();
+            }
+        }
     }
 }

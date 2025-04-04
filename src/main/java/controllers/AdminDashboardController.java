@@ -29,6 +29,7 @@ public class AdminDashboardController {
 
     @FXML
     public void initialize() {
+
         loadProductsInCardView();
     }
 
@@ -247,6 +248,30 @@ public class AdminDashboardController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    @FXML
+    private void handleStatistics() {
+        try {
+            // Get the resource URL to verify it exists
+            java.net.URL resourceUrl = getClass().getResource("/statistics_view.fxml");
 
- 
-}
+            if (resourceUrl == null) {
+                showAlert("Error", "Could not find resource: /statistics_view.fxml");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(resourceUrl);
+            Parent root = loader.load();
+
+            // Create a new stage for the statistics view
+            Stage statisticsStage = new Stage();
+            statisticsStage.setScene(new Scene(root));
+            statisticsStage.setTitle("Product Statistics");
+            statisticsStage.initModality(Modality.APPLICATION_MODAL); // Make it modal
+            statisticsStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load statistics view: " + e.getMessage() +
+                    "\nResource URL: " + getClass().getResource("/statistics_view.fxml"));
+        }
+
+}}
