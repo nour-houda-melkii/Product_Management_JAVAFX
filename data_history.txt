@@ -1,0 +1,1 @@
+[2025-04-05 19:44:33] PRODUCT ADDED: ID=38, Name=bandage 1, Description=Introducing our premium bandage 1, designed to elevate your experience with exceptional quality and performance., Price=50.00, Quantity=30, CategoryID=14, ImagePath=src/main/resources/images/Screenshot 2024-01-04 105917.png

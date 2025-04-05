@@ -274,4 +274,32 @@ public class AdminDashboardController {
                     "\nResource URL: " + getClass().getResource("/statistics_view.fxml"));
         }
 
-}}
+
+
+}@FXML
+    private void handleDataHistory() {
+        try {
+            // Get the resource URL to verify it exists
+            java.net.URL resourceUrl = getClass().getResource("/data_history_view.fxml");
+
+            if (resourceUrl == null) {
+                showAlert("Error", "Could not find resource: /data_history_view.fxml");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(resourceUrl);
+            Parent root = loader.load();
+
+            // Create a new stage for the data history view
+            Stage historyStage = new Stage();
+            historyStage.setScene(new Scene(root));
+            historyStage.setTitle("Data History");
+            historyStage.initModality(Modality.APPLICATION_MODAL); // Make it modal
+            historyStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load data history view: " + e.getMessage() +
+                    "\nResource URL: " + getClass().getResource("/data_history_view.fxml"));
+        }
+    }
+}

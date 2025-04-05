@@ -8,6 +8,11 @@ import java.util.List;
 
 public class CategoryServices {
     private Connection con = DBConnection.getInstance().getCon();
+    private DataPersistenceService dataPersistenceService;
+
+    public CategoryServices() {
+        dataPersistenceService = new DataPersistenceService();
+    }
 
     public int insert(Category category) throws SQLException {
         String req = "INSERT INTO categories (name, description) VALUES (?, ?)";
@@ -22,7 +27,13 @@ public class CategoryServices {
 
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1);
+                    int generatedId = generatedKeys.getInt(1);
+                    category.setId(generatedId);
+
+                    // Record the addition in data history
+                    dataPersistenceService.recordCategoryAdded(category);
+
+                    return generatedId;
                 } else {
                     throw new SQLException("Creating category failed, no ID obtained.");
                 }
@@ -31,12 +42,23 @@ public class CategoryServices {
     }
 
     public int update(Category category) throws SQLException {
+        // Get the old category data before updating
+        Category oldCategory = getCategoryById(category.getId());
+
         String req = "UPDATE categories SET name = ?, description = ? WHERE id = ?";
         try (PreparedStatement ps = con.prepareStatement(req)) {
             ps.setString(1, category.getName());
             ps.setString(2, category.getDescription());
             ps.setInt(3, category.getId());
-            return ps.executeUpdate();
+
+            int result = ps.executeUpdate();
+
+            // Record the update in data history
+            if (result > 0 && oldCategory != null) {
+                dataPersistenceService.recordCategoryUpdated(oldCategory, category);
+            }
+
+            return result;
         }
     }
 
@@ -44,6 +66,10 @@ public class CategoryServices {
         String req = "DELETE FROM categories WHERE id = ?";
         try (PreparedStatement ps = con.prepareStatement(req)) {
             ps.setInt(1, category.getId());
+
+            // Record the deletion before actually deleting
+            dataPersistenceService.recordCategoryDeleted(category);
+
             return ps.executeUpdate();
         }
     }
@@ -80,6 +106,4 @@ public class CategoryServices {
         }
         return null;
     }
-
-
 }

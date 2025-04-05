@@ -40,6 +40,10 @@
             <text>Statistics</text>
         </Button>
 
+        <Button text="Data History"
+                onAction="#handleDataHistory"
+                style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-background-radius: 4;"/>
+
     </HBox>
 
     <!-- Title -->
