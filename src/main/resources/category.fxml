@@ -1,50 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.cell.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.CategoryController" spacing="10">
+<VBox prefHeight="586.0" prefWidth="705.0" spacing="10" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CategoryController">
     <padding>
-        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
     </padding>
 
     <HBox alignment="CENTER_RIGHT">
-        <Button text="Back to Dashboard" onAction="#navigateToDashboard"
-                style="-fx-background-color: #607D8B; -fx-text-fill: white;"/>
+        <Button onAction="#navigateToDashboard" style="-fx-background-color: #607D8B; -fx-text-fill: white;" text="Back to Dashboard" />
     </HBox>
 
     <TableView fx:id="categoryTable">
         <columns>
-            <TableColumn fx:id="nameColumn" text="Name" prefWidth="200"/>
-            <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
+            <TableColumn fx:id="nameColumn" prefWidth="200" text="Name" />
+            <TableColumn fx:id="descriptionColumn" prefWidth="300" text="Description" />
         </columns>
     </TableView>
 
     <GridPane hgap="10" vgap="10">
         <padding>
-            <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
         </padding>
 
-        <Label text="Category Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <TextField fx:id="nameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+        <Label text="Category Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="nameField" prefHeight="26.0" prefWidth="260.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-        <HBox spacing="10" GridPane.rowIndex="0" GridPane.columnIndex="2">
-            <Button fx:id="generateDescriptionButton" text="Generate AI Description"
-                    onAction="#generateAIDescription"
-                    style="-fx-background-color: #9C27B0; -fx-text-fill: white;"/>
-        </HBox>
+        <HBox spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="0" />
 
-        <Label text="Description:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <TextField fx:id="descriptionField" GridPane.rowIndex="1" GridPane.columnIndex="1"
-                   GridPane.columnSpan="2" prefWidth="400"/>
+        <Label text="Description:" GridPane.rowIndex="2" />
+        <TextField fx:id="descriptionField" prefHeight="26.0" prefWidth="239.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+         <Button fx:id="generateDescriptionButton" onAction="#generateAIDescription" style="-fx-background-color: #9C27B0; -fx-text-fill: white;" text="Generate AI Description" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+      <columnConstraints>
+         <ColumnConstraints />
+         <ColumnConstraints />
+         <ColumnConstraints />
+         <ColumnConstraints />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+      </rowConstraints>
     </GridPane>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Button text="Add" onAction="#addCategory" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-        <Button text="Update" onAction="#updateCategory" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-        <Button text="Delete" onAction="#deleteCategory" style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+    <HBox alignment="CENTER" spacing="10">
+        <Button onAction="#addCategory" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Add" />
+        <Button onAction="#updateCategory" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Update" />
+        <Button onAction="#deleteCategory" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Delete" />
     </HBox>
 </VBox>

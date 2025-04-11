@@ -10,6 +10,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -18,11 +19,13 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.animation.PauseTransition;
+import javafx.collections.FXCollections;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -33,6 +36,9 @@ public class ProductFrontController {
 
     @FXML
     private TextField searchField;
+
+    @FXML
+    private ComboBox<String> sortComboBox;
 
     @FXML
     private Label cartCountLabel;
@@ -47,6 +53,19 @@ public class ProductFrontController {
 
     @FXML
     public void initialize() {
+        // Initialize sorting options
+        sortComboBox.setItems(FXCollections.observableArrayList(
+                "Default",
+                "Name (A-Z)",
+                "Name (Z-A)",
+                "Price (Low-High)",
+                "Price (High-Low)"
+        ));
+        sortComboBox.setValue("Default");
+
+        // Add listener for sorting
+        sortComboBox.setOnAction(event -> applySortingAndFiltering());
+
         setupSearchListener();
         loadProductsInCardView();
         updateCounters();
@@ -58,16 +77,57 @@ public class ProductFrontController {
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             pause.setOnFinished(event -> {
-                filterProducts(newValue.toLowerCase());
+                applySortingAndFiltering();
             });
             pause.playFromStart();
         });
     }
 
+    private void applySortingAndFiltering() {
+        // First filter the products
+        String searchText = searchField.getText().toLowerCase();
+        List<Produit> filteredProducts;
+
+        if (searchText == null || searchText.isEmpty()) {
+            filteredProducts = new ArrayList<>(allProducts);
+        } else {
+            filteredProducts = allProducts.stream()
+                    .filter(product ->
+                            product.getName().toLowerCase().contains(searchText) ||
+                                    product.getDescription().toLowerCase().contains(searchText)
+                    )
+                    .collect(Collectors.toList());
+        }
+
+        // Then sort the filtered products
+        String sortOption = sortComboBox.getValue();
+        switch (sortOption) {
+            case "Name (A-Z)":
+                filteredProducts.sort(Comparator.comparing(Produit::getName));
+                break;
+            case "Name (Z-A)":
+                filteredProducts.sort(Comparator.comparing(Produit::getName).reversed());
+                break;
+            case "Price (Low-High)":
+                filteredProducts.sort(Comparator.comparing(Produit::getPrice));
+                break;
+            case "Price (High-Low)":
+                filteredProducts.sort(Comparator.comparing(Produit::getPrice).reversed());
+                break;
+            default:
+                // Default sorting (by ID or as returned from database)
+                filteredProducts.sort(Comparator.comparing(Produit::getId));
+                break;
+        }
+
+        // Display the filtered and sorted products
+        displayProducts(filteredProducts);
+    }
+
     private void filterProducts(String searchText) {
         if (searchText == null || searchText.isEmpty()) {
-            // If search is empty, show all products
-            displayProducts(allProducts);
+            // If search is empty, show all products but maintain sorting
+            applySortingAndFiltering();
             return;
         }
 
@@ -93,7 +153,7 @@ public class ProductFrontController {
         try {
             ProduitServices produitService = new ProduitServices();
             allProducts = produitService.showAll();
-            displayProducts(allProducts);
+            applySortingAndFiltering();
         } catch (SQLException e) {
             showAlert("Error", "Failed to load products: " + e.getMessage());
         }

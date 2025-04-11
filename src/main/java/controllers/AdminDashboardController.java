@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -16,11 +17,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.Button;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.collections.FXCollections;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 
 public class AdminDashboardController {
@@ -28,23 +31,71 @@ public class AdminDashboardController {
     private FlowPane productContainer;
 
     @FXML
-    public void initialize() {
+    private ComboBox<String> sortComboBox;
 
+    private List<Produit> currentProducts;
+
+    @FXML
+    public void initialize() {
+        // Initialize sorting options
+        sortComboBox.setItems(FXCollections.observableArrayList(
+                "Default",
+                "Name (A-Z)",
+                "Name (Z-A)",
+                "Price (Low-High)",
+                "Price (High-Low)"
+        ));
+        sortComboBox.setValue("Default");
+
+        // Add listener for sorting
+        sortComboBox.setOnAction(event -> handleSort());
+
+        // Load products
         loadProductsInCardView();
+    }
+
+    private void handleSort() {
+        if (currentProducts == null || currentProducts.isEmpty()) return;
+
+        String sortOption = sortComboBox.getValue();
+        switch (sortOption) {
+            case "Name (A-Z)":
+                currentProducts.sort(Comparator.comparing(Produit::getName));
+                break;
+            case "Name (Z-A)":
+                currentProducts.sort(Comparator.comparing(Produit::getName).reversed());
+                break;
+            case "Price (Low-High)":
+                currentProducts.sort(Comparator.comparing(Produit::getPrice));
+                break;
+            case "Price (High-Low)":
+                currentProducts.sort(Comparator.comparing(Produit::getPrice).reversed());
+                break;
+            default:
+                // Default order (by ID or as returned from database)
+                currentProducts.sort(Comparator.comparing(Produit::getId));
+                break;
+        }
+
+        // Refresh the view with sorted products
+        displayProducts(currentProducts);
     }
 
     private void loadProductsInCardView() {
         try {
             ProduitServices produitService = new ProduitServices();
-            List<Produit> products = produitService.showAll();
-            productContainer.getChildren().clear();
-
-            for (Produit product : products) {
-                VBox card = createProductCard(product);
-                productContainer.getChildren().add(card);
-            }
+            currentProducts = produitService.showAll();
+            displayProducts(currentProducts);
         } catch (SQLException e) {
             showAlert("Error", "Failed to load products: " + e.getMessage());
+        }
+    }
+
+    private void displayProducts(List<Produit> products) {
+        productContainer.getChildren().clear();
+        for (Produit product : products) {
+            VBox card = createProductCard(product);
+            productContainer.getChildren().add(card);
         }
     }
 
@@ -152,10 +203,10 @@ public class AdminDashboardController {
 
             // Handle both absolute and relative paths
             Image image;
-            if (imagePath.startsWith("/"))
-            // Resource path (from JAR)
-            image = new Image(getClass().getResourceAsStream(imagePath));
-             if (imagePath.startsWith("file:")) {
+            if (imagePath.startsWith("/")) {
+                // Resource path (from JAR)
+                image = new Image(getClass().getResourceAsStream(imagePath));
+            } else if (imagePath.startsWith("file:")) {
                 // Absolute file path
                 image = new Image(imagePath);
             } else {
@@ -228,6 +279,7 @@ public class AdminDashboardController {
                     "\nResource URL: " + getClass().getResource("/product_client.fxml"));
         }
     }
+
     @FXML
     private void handleCategories() {
         try {
@@ -248,6 +300,7 @@ public class AdminDashboardController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     @FXML
     private void handleStatistics() {
         try {
@@ -273,10 +326,9 @@ public class AdminDashboardController {
             showAlert("Error", "Failed to load statistics view: " + e.getMessage() +
                     "\nResource URL: " + getClass().getResource("/statistics_view.fxml"));
         }
+    }
 
-
-
-}@FXML
+    @FXML
     private void handleDataHistory() {
         try {
             // Get the resource URL to verify it exists
