@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminDashboardController">
+    <!-- Top Navigation Bar -->
+    <HBox alignment="CENTER" layoutX="0.0" layoutY="0.0" prefHeight="50.0" prefWidth="800.0" spacing="20.0" style="-fx-background-color: #3498db;">
+        <Button fx:id="frontButton" onAction="#handleFrontView" prefHeight="40.0" prefWidth="150.0" style="-fx-font-size: 16px; -fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+            <text>Front View</text>
+        </Button>
+        <Button fx:id="categoriesButton" onAction="#handleCategories" prefHeight="40.0" prefWidth="150.0" style="-fx-font-size: 16px; -fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+            <text>Categories</text>
+        </Button>
+        <Button fx:id="tableViewButton" onAction="#handleTableViewButton" prefHeight="40.0" prefWidth="150.0" style="-fx-font-size: 16px; -fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+            <text>Table View</text>
+        </Button>
+        <Button fx:id="statisticsButton" onAction="#handleStatistics" prefHeight="40.0" prefWidth="120.0" style="-fx-font-size: 14px; -fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5;">
+            <font>
+                <Font name="System Bold" size="14.0" />
+            </font>
+            <text>Statistics</text>
+        </Button>
+        <Button onAction="#handleDataHistory" prefHeight="40.0" prefWidth="120.0" style="-fx-font-size: 14px; -fx-background-color: #9b59b6; -fx-text-fill: white; -fx-background-radius: 5;" text="Data History" />
+    </HBox>
+
+    <!-- Title -->
+    <Label alignment="CENTER" layoutX="0.0" layoutY="60.0" prefHeight="40.0" prefWidth="800.0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Product Management Dashboard" />
+
+    <!-- Sorting Options -->
+    <HBox alignment="CENTER_RIGHT" layoutX="68.0" layoutY="100.0" prefHeight="30.0" prefWidth="700.0" spacing="10.0">
+        <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="Sort by:" />
+        <ComboBox fx:id="sortComboBox" prefHeight="26.0" prefWidth="150.0" />
+    </HBox>
+
+    <!-- Product Container with styled scrollpane -->
+    <ScrollPane fitToWidth="true" layoutX="50.0" layoutY="150.0" prefHeight="430.0" prefWidth="700.0" style="-fx-background-color: transparent; -fx-border-color: #e0e0e0; -fx-border-radius: 5;">
+        <FlowPane fx:id="productContainer" hgap="20" prefWidth="680.0" style="-fx-padding: 20;" vgap="20" />
+    </ScrollPane>
+</AnchorPane>
