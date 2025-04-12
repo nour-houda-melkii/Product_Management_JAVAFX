@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="67f812a0-6c1d-4f08-bb79-468f0bf5180a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,9 +59,9 @@
     "Maven.produit [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Origin",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/nourm/OneDrive/Bureau/krayett zahy/Product-Management-JavaFX-main",
+    "last_opened_file_path": "C:/Users/nourm/OneDrive/Bureau/krayett zahy/gestion_produit",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -143,6 +144,8 @@
       <workItem from="1744458677176" duration="26000" />
       <workItem from="1744458728320" duration="57000" />
       <workItem from="1744458843396" duration="11000" />
+      <workItem from="1744459706691" duration="816000" />
+      <workItem from="1744461239834" duration="105000" />
     </task>
     <servers />
   </component>
