@@ -17,7 +17,7 @@ public class Home extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            // Load the face login screen instead of going directly to dashboard
+            // Load the face login screen
             String fxmlPath = "/face_login.fxml";
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
@@ -39,17 +39,17 @@ public class Home extends Application {
             System.err.println("Error loading FXML file: " + e.getMessage());
             e.printStackTrace();
 
-            // Fall back to admin dashboard if face login fails to load
-            try {
-                Parent root = FXMLLoader.load(getClass().getResource("/admin_dashboard.fxml"));
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.setTitle("Admin Dashboard");
-                stage.show();
-            } catch (IOException e2) {
-                System.err.println("Critical error: Unable to load any FXML file");
-                e2.printStackTrace();
-            }
+            // Show error message instead of automatically loading the dashboard
+            showErrorAlert("Failed to load login screen. Please contact system administrator.");
         }
+    }
+
+    private void showErrorAlert(String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle("Application Error");
+        alert.setHeaderText("Failed to Start Application");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

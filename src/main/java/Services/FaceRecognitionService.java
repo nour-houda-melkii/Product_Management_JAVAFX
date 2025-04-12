@@ -40,10 +40,12 @@ public class FaceRecognitionService {
         } catch (UnsatisfiedLinkError e) {
             System.err.println("Failed to load OpenCV library: " + e.getMessage());
             e.printStackTrace();
+
         }
+
     }
 
-    private Webcam webcam;
+    private static Webcam webcam;
     private CascadeClassifier faceDetector;
     private ScheduledExecutorService timer;
     private boolean isRunning = false;

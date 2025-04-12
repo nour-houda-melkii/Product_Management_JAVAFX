@@ -2,136 +2,104 @@ package Services;
 
 import Utils.DBConnection;
 import entities.Produit;
+import Utils.DBConnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProduitServices implements CRUD<Produit> {
-    private Connection con = DBConnection.getInstance().getCon();
-    private Statement st;
-    private PreparedStatement ps;
-    private DataPersistenceService dataPersistenceService;
+public class ProduitServices {
+    private Connection connection;
 
     public ProduitServices() {
-        dataPersistenceService = new DataPersistenceService();
+        try {
+            connection = DBConnection.getConnection();
+        } catch (SQLException e) {
+            System.err.println("Error connecting to database: " + e.getMessage());
+        }
     }
 
-    @Override
     public int insert(Produit produit) throws SQLException {
-        String req = "INSERT INTO products (name, description, price, image_path, quantity, category_id) VALUES (?, ?, ?, ?, ?, ?)";
-        ps = con.prepareStatement(req, Statement.RETURN_GENERATED_KEYS);
+        String query = "INSERT INTO produit (category_id, name, description, price, image, quantity) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, produit.getCategoryId());
+            ps.setString(2, produit.getName());
+            ps.setString(3, produit.getDescription());
+            ps.setDouble(4, produit.getPrice());
+            ps.setString(5, produit.getImagePath());
+            ps.setInt(6, produit.getQuantity());
 
-        ps.setString(1, produit.getName());
-        ps.setString(2, produit.getDescription());
-        ps.setDouble(3, produit.getPrice());
-        ps.setString(4, produit.getImagePath());
-        ps.setInt(5, produit.getQuantity());
-        ps.setInt(6, produit.getCategoryId());
+            ps.executeUpdate();
 
-        int affectedRows = ps.executeUpdate();
-
-        if (affectedRows == 0) {
-            throw new SQLException("Creating product failed, no rows affected.");
-        }
-
-        try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-            if (generatedKeys.next()) {
-                int generatedId = generatedKeys.getInt(1);
-                produit.setId(generatedId);
-
-                // Record the addition in data history
-                dataPersistenceService.recordProductAdded(produit);
-
-                return generatedId;
-            } else {
-                throw new SQLException("Creating product failed, no ID obtained.");
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Failed to get inserted ID");
+                }
             }
         }
     }
 
-    @Override
-    public int update(Produit produit) throws SQLException {
-        // First, get the original product data before updating
-        Produit oldProduct = getProductById(produit.getId());
-
-        String req = "UPDATE products SET name = ?, description = ?, price = ?, image_path = ?, quantity = ?, category_id = ? WHERE id = ?";
-
-        try (PreparedStatement ps = con.prepareStatement(req)) {
-            ps.setString(1, produit.getName());
-            ps.setString(2, produit.getDescription());
-            ps.setDouble(3, produit.getPrice());
-            ps.setString(4, produit.getImagePath());
-            ps.setInt(5, produit.getQuantity());
-            ps.setInt(6, produit.getCategoryId());
+    public void update(Produit produit) throws SQLException {
+        String query = "UPDATE produit SET category_id = ?, name = ?, description = ?, price = ?, image = ?, quantity = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, produit.getCategoryId());
+            ps.setString(2, produit.getName());
+            ps.setString(3, produit.getDescription());
+            ps.setDouble(4, produit.getPrice());
+            ps.setString(5, produit.getImagePath());
+            ps.setInt(6, produit.getQuantity());
             ps.setInt(7, produit.getId());
 
-            int result = ps.executeUpdate();
-
-            // Record the update in data history
-            if (result > 0 && oldProduct != null) {
-                dataPersistenceService.recordProductUpdated(oldProduct, produit);
-            }
-
-            return result;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            throw e;
+            ps.executeUpdate();
         }
     }
 
-    @Override
-    public int delete(Produit produit) throws SQLException {
-        String req = "DELETE FROM products WHERE id = ?";
-        try (PreparedStatement ps = con.prepareStatement(req)) {
+    public void delete(Produit produit) throws SQLException {
+        String query = "DELETE FROM produit WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, produit.getId());
-
-            // Record the deletion before actually deleting
-            dataPersistenceService.recordProductDeleted(produit);
-
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            return 0;
+            ps.executeUpdate();
         }
     }
 
-    @Override
     public List<Produit> showAll() throws SQLException {
-        List<Produit> products = new ArrayList<>();
-        String req = "SELECT * FROM products";
-        st = con.createStatement();
-        ResultSet rs = st.executeQuery(req);
+        List<Produit> produits = new ArrayList<>();
+        String query = "SELECT * FROM produit";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
 
-        while (rs.next()) {
-            Produit produit = new Produit();
-            produit.setId(rs.getInt("id"));
-            produit.setName(rs.getString("name"));
-            produit.setDescription(rs.getString("description"));
-            produit.setPrice(rs.getDouble("price"));
-            produit.setImagePath(rs.getString("image_path"));
-            produit.setQuantity(rs.getInt("quantity"));
-            produit.setCategoryId(rs.getInt("category_id"));
+            while (resultSet.next()) {
+                Produit produit = new Produit();
+                produit.setId(resultSet.getInt("id"));
+                produit.setCategoryId(resultSet.getInt("category_id"));
+                produit.setName(resultSet.getString("name"));
+                produit.setDescription(resultSet.getString("description"));
+                produit.setPrice(resultSet.getDouble("price"));
+                produit.setImagePath(resultSet.getString("image"));
+                produit.setQuantity(resultSet.getInt("quantity"));
 
-            products.add(produit);
+                produits.add(produit);
+            }
         }
-
-        return products;
+        return produits;
     }
 
-    public Produit getProductById(int id) throws SQLException {
-        String req = "SELECT * FROM products WHERE id = ?";
-        try (PreparedStatement ps = con.prepareStatement(req)) {
+    public Produit getOne(int id) throws SQLException {
+        String query = "SELECT * FROM produit WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
                     Produit produit = new Produit();
-                    produit.setId(rs.getInt("id"));
-                    produit.setName(rs.getString("name"));
-                    produit.setDescription(rs.getString("description"));
-                    produit.setPrice(rs.getDouble("price"));
-                    produit.setImagePath(rs.getString("image_path"));
-                    produit.setQuantity(rs.getInt("quantity"));
-                    produit.setCategoryId(rs.getInt("category_id"));
+                    produit.setId(resultSet.getInt("id"));
+                    produit.setCategoryId(resultSet.getInt("category_id"));
+                    produit.setName(resultSet.getString("name"));
+                    produit.setDescription(resultSet.getString("description"));
+                    produit.setPrice(resultSet.getDouble("price"));
+                    produit.setImagePath(resultSet.getString("image"));
+                    produit.setQuantity(resultSet.getInt("quantity"));
                     return produit;
                 }
             }
@@ -139,7 +107,26 @@ public class ProduitServices implements CRUD<Produit> {
         return null;
     }
 
-    public PreparedStatement getConnection() {
-        return null;
+    public List<Produit> getByCategory(int categoryId) throws SQLException {
+        List<Produit> produits = new ArrayList<>();
+        String query = "SELECT * FROM produit WHERE category_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    Produit produit = new Produit();
+                    produit.setId(resultSet.getInt("id"));
+                    produit.setCategoryId(resultSet.getInt("category_id"));
+                    produit.setName(resultSet.getString("name"));
+                    produit.setDescription(resultSet.getString("description"));
+                    produit.setPrice(resultSet.getDouble("price"));
+                    produit.setImagePath(resultSet.getString("image"));
+                    produit.setQuantity(resultSet.getInt("quantity"));
+
+                    produits.add(produit);
+                }
+            }
+        }
+        return produits;
     }
 }

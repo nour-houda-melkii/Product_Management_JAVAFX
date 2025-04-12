@@ -6,39 +6,38 @@ import java.sql.SQLException;
 
 public class DBConnection {
     // Database connection parameters (using default values if .env not available)
-    private final String URL;
-    private final String USER;
-    private final String PWD;
+    private static final String URL = "jdbc:mysql://localhost:3306/pi_data_base";
+    private static final String USER = "root";
+    private static final String PASSWORD = "";
 
-    private static DBConnection instance;
-    private Connection con;
+    private static Connection connection;
 
-    private DBConnection() {
-        // Try to load from environment variables or use defaults
-        this.URL = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/produitjavafx";
-        this.USER = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
-        this.PWD = System.getenv("DB_PWD") != null ? System.getenv("DB_PWD") : "";
+    public static Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                System.out.println("Connected to database: pi_data_base");
+            } catch (ClassNotFoundException e) {
+                System.err.println("MySQL JDBC Driver not found");
+                throw new SQLException("MySQL JDBC Driver not found", e);
+            }
+        }
+        return connection;
+    }
 
-        try {
-            con = DriverManager.getConnection(URL, USER, PWD);
-            System.out.println("Connection successful");
-        } catch (SQLException e) {
-            System.err.println("Database connection failed: " + e.getMessage());
+    public static void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+                System.out.println("Database connection closed");
+            } catch (SQLException e) {
+                System.err.println("Error closing database connection: " + e.getMessage());
+            }
         }
     }
 
-    public static synchronized DBConnection getInstance() {
-        if (instance == null) {
-            instance = new DBConnection();
-        }
-        return instance;
-    }
-
-    public Connection getCon() {
-        return con;
-    }
-
-    public Connection getCnx() {
+    public static Object getInstance() {
         return null;
     }
 }
